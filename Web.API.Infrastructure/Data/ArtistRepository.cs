@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Web.API.Core.Entities;
@@ -8,7 +9,7 @@ using Web.API.Core.Interfaces;
 
 namespace Web.API.Infrastructure.Data
 {
-    public class ArtistRepository : IRepository<Artist>
+    public class ArtistRepository : IArtistRepository
     {
         private readonly DbContext _dbContext;
 
@@ -47,6 +48,13 @@ namespace Web.API.Infrastructure.Data
         public async Task<Artist> GetAsync(int id)
         {
             return await this._dbContext.Set<Artist>().FindAsync(id);
+        }
+
+        public async Task<Artist> GetByNameAsync(string name)
+        {
+            return await this._dbContext.Set<Artist>()
+                .Where(x => x.Name.Equals(name))
+                .FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Artist>> GetAllAsync()

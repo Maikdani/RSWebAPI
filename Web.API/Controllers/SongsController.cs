@@ -14,69 +14,63 @@ namespace Web.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ArtistsController : ControllerBase
+    public class SongsController : ControllerBase
     {
-        private readonly IArtistService _artistService;
+        private readonly ISongService _songService;
 
-        public ArtistsController(IArtistService artistService)
+        public SongsController(ISongService songService)
         {
-            this._artistService = artistService;
+            this._songService = songService;
         }
 
-        // GET: api/Artists
+        // GET: api/Songs
         [HttpGet]
-        public async Task<IEnumerable<ArtistDTO>> GetArtist()
+        public async Task<IEnumerable<SongDTO>> GetSong()
         {
-            return await this._artistService.GetAllAsync();
+            return await this._songService.GetAllAsync();
         }
 
-        // GET: api/Artists/5
+        // GET: api/Songs/5
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<ArtistDTO>> GetArtist(int id)
+        public async Task<ActionResult<SongDTO>> GetSong(int id)
         {
-            var artist = await this._artistService.GetAsync(id);
+            var song = await this._songService.GetAsync(id);
 
-            if (artist == null)
+            if (song == null)
             {
                 return NotFound();
             }
 
-            return Ok(artist);
+            return Ok(song);
         }
 
-        [HttpGet("{name}")]
-        public async Task<ActionResult<ArtistDTO>> GetByNameAsync(string name)
+        // GET: api/Songs/5
+        [HttpGet("{genre}")]
+        public async Task<IEnumerable<SongDTO>> GetSongsByGenre(string genre)
         {
-            var artist = await this._artistService.GetByNameAsync(name);
-
-            if (artist == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(artist);
+            return await this._songService.GetByGenreAsync(genre);
         }
 
-        // PUT: api/Artists/5
+        // PUT: api/Songs/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutArtist(int id, ArtistDTO artist)
+        public async Task<IActionResult> PutSong(int id, SongDTO song)
         {
             if (ModelState.IsValid)
             {
-                if (id != artist.Id)
+                if (id != song.Id)
                 {
                     return BadRequest();
                 }
 
                 try
                 {
-                    await this._artistService.UpdateAsync(id, artist);
+                    await this._songService.UpdateAsync(id, song);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!await ArtistExistsAsync(id))
+                    if (!await SongExistsAsync(id))
                     {
                         return NotFound();
                     }
@@ -94,21 +88,21 @@ namespace Web.API.Controllers
             }
         }
 
-        // POST: api/Artists
+        // POST: api/Songs
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<ArtistDTO>> PostArtist(ArtistDTO artist)
+        public async Task<ActionResult<SongDTO>> PostSong(SongDTO song)
         {
             if (ModelState.IsValid)
             {
-                artist = await this._artistService.AddAsync(artist);
+                song = await this._songService.AddAsync(song);
 
-                if (artist == null)
+                if (song == null)
                 {
                     return BadRequest();
                 }
-                return artist;
+                return song;
             }
             else
             {
@@ -116,22 +110,22 @@ namespace Web.API.Controllers
             }
         }
 
-        // DELETE: api/Artists/5
+        // DELETE: api/Songs/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ArtistDTO>> DeleteArtist(int id)
+        public async Task<ActionResult<SongDTO>> DeleteSong(int id)
         {
-            var artist = await this._artistService.DeleteAsync(id);
-            if (artist == null)
+            var song = await this._songService.DeleteAsync(id);
+            if (song == null)
             {
                 return NotFound();
             }
 
-            return artist;
+            return song;
         }
 
-        private async Task<bool> ArtistExistsAsync(int id)
+        private async Task<bool> SongExistsAsync(int id)
         {
-            return await this._artistService.GetAsync(id) != null;
+            return await this._songService.GetAsync(id) != null;
         }
     }
 }

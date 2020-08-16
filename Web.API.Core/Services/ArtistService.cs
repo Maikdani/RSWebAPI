@@ -11,10 +11,10 @@ namespace Web.API.Core.Services
 {
     public class ArtistService : IArtistService
     {
-        private readonly IRepository<Artist> _artistRepository;
+        private readonly IArtistRepository _artistRepository;
         private readonly IMapper _mapper;
 
-        public ArtistService(IRepository<Artist> artistRepository,
+        public ArtistService(IArtistRepository artistRepository,
             IMapper mapper)
         {
             this._artistRepository = artistRepository;
@@ -25,8 +25,12 @@ namespace Web.API.Core.Services
         {
             try
             {
-                // Logic voor dubbele naam hier toevoegen
+                artistDTO.Id = 0;
                 var artist = this._mapper.Map<Artist>(artistDTO);
+
+                if (await this._artistRepository.GetByNameAsync(artist.Name) != null)
+                    return null;
+
                 artist = await this._artistRepository.AddAsync(artist);
                 return this._mapper.Map<ArtistDTO>(artist);
             }
@@ -53,6 +57,19 @@ namespace Web.API.Core.Services
             try
             {
                 ArtistDTO artist = this._mapper.Map<ArtistDTO>(await this._artistRepository.GetAsync(id));
+                return artist;
+            }
+            catch (Exception exception)
+            {
+                return null;
+            }
+        }
+
+        public async Task<ArtistDTO> GetByNameAsync(string name)
+        {
+            try
+            {
+                ArtistDTO artist = this._mapper.Map<ArtistDTO>(await this._artistRepository.GetByNameAsync(name));
                 return artist;
             }
             catch (Exception exception)

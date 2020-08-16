@@ -17,6 +17,10 @@ using Web.API.Core.Profiles;
 using Web.API.Core.Interfaces;
 using Web.API.Core.Services;
 using Web.API.Core.Entities;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace Web.API
 {
@@ -38,20 +42,50 @@ namespace Web.API
                     options.UseSqlServer(Configuration.GetConnectionString("WebAPIContext")));
 
             services.AddScoped<IArtistService, ArtistService>();
-            services.AddScoped<IRepository<Artist>, ArtistRepository>();
-            services.AddScoped<ArtistRepository>();
+            services.AddScoped<ISongService, SongService>();
+
+            services.AddScoped<IArtistRepository, ArtistRepository>();
+            services.AddScoped<ISongRepository, SongRepository>();
+
             services.AddScoped<DbContext, WebAPIContext>();
 
+            services.AddTransient<DataSeeding>();
+
+            services.AddSwaggerDocument(config =>
+            {
+                config.PostProcess = document =>
+                {
+                    document.Info.Version = "v1";
+                    document.Info.Title = "Rockstar Web API";
+                    document.Info.Description = "A Heavy Metal ASP.NET Core web API";
+                    document.Info.TermsOfService = "None";
+                    document.Info.Contact = new NSwag.OpenApiContact
+                    {
+                        Name = "Maikel Langezaal",
+                        Email = "maikellangezaal@hotmail.com",
+                    };
+                };
+            });
             services.AddAutoMapper(c => c.AddProfile<RockstarProfile>(), typeof(Startup));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataSeeding dataSeeding)
         {
+            dataSeeding.AddSeedData(env.ContentRootPath);
+            app.UseOpenApi();
+            app.UseSwaggerUi3();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "AppData")),
+                RequestPath = new PathString("/AppData")
+            });
 
             app.UseHttpsRedirection();
 

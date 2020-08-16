@@ -13,5 +13,6 @@ namespace Web.API.Core.Interfaces
         Task<ArtistDTO> UpdateAsync(int id, ArtistDTO artist);
         Task<ArtistDTO> DeleteAsync(int id);
         Task<IEnumerable<ArtistDTO>> GetAllAsync();
+        Task<ArtistDTO> GetByNameAsync(string name);
     }
 }
